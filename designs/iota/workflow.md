@@ -1,0 +1,47 @@
+# IOTA Transfer Workflow
+
+## 1. Generate Transaction Object(s)
+A transaction may serve different purposes depending on the value or data that is being transferred. If there is a monetary vale being transferred from one address to another, 4 transactions are bundled together to create a UTXO like transfer. If there is only data being transferred, then only one transaction is created.
+
+### Transaction Object (2673 trytes)
+* __`hash (string: 81 trytes)`:__ The hash of the transaction after performing the proof of work and finding the correct nonce.
+* __`signatureMessageFragment (string: 2187 trytes)`:__ In case there is a spent input, the signature of the private key is stored here. If no signature is required, it is empty (all 9's) or can be used for storing data.
+* __`address (string: 81 trytes)`:__ Depending on whether this transaction is being used to supply the bundle as an input or is the output, it will contain either the input or output address respectively. Otherwise, if this transaction contains no value transfer, it may be an arbitrary address for the data to be sent to.
+* __`value (int: 27 trytes)`:__ The value being transferred in this transaction. Otherwise, set to 0 for a data transfer.
+* __`obsoleteTag (string: 27 trytes)`:__ An arbitrary user defined tag to distinguish this transaction.
+* __`timestamp (int: 9 trytes)`:__ The timestamp of when the transaction was created.
+* __`currentIndex (int: 9 trytes)`:__ The index of this transaction in the bundle.
+* __`lastIndex (int: 9 trytes)`:__ The total number of transactions present in the bundle.
+* __`bundle (string: 81 trytes)`:__ The bundle's hash, used for grouping transactions together. Details on how it is calculated below.
+* __`trunkTransaction (string: 81 trytes)`:__ The hash of the 1st transaction to reference (approve).
+* __`branchTransaction (string: 81 trytes)`:__ The hash of the 2nd transaction to reference (approve).
+* __`tag (string: 27 trytes)`:__ An arbitrary user defined tag to distinguish this transaction.
+* __`attachmentTimestamp (int: 9 trytes)`:__ The timestamp when the PoW is complete.
+* __`attachmentTimestampLowerBound (int: 9 trytes)`:__ TODO (Future use)
+* __`attachmentTimestampUpperBound (int: 9 trytes)`:__ TODO (Future use)
+* __`nonce (string: 27 trytes)`:__ The nonce used to obtain the correct hash of this transaction which satisfies the Minimum Weight Magnitude (Details below).
+
+### Example __Data__ Transaction
+Here is an example of a data transaction. The signatureMessageFragment contains the data (converted to trytes) 
+```json
+{
+	"hash": "PVOPYZMHXPTIFNJNCUIOZYOULO9FBIWIRLBTDUO9PZ9SAI9CWKIBMZWZPEWMITIBNMAXVENXYNCQ99999",
+	"signatureMessageFragment": "ODGABDPCADTCGADBGACCTCGDHD9DCDGAQAGAADTCGDGDPCVCTCGADBGARBPC9D9DCDEAHDWCTCFDTCSAEAVAWAXAYAZAGAQD999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+	"address": "EC9SMJQEROYFZLCTRZGRZHMVEVGEMQQNAFXWFDVERLUGYRGPAEIOUNXAGBCMKFXGRNQHFXUUWHSKQXBXX",
+	"value": 0,
+	"obsoleteTag": "RLNSPAN99999999999999999999",
+	"timestamp": 1523059969,
+	"currentIndex": 0,
+	"lastIndex": 0,
+	"bundle": "XTEKQODEBWFVT9WGPIJBYQCDJCOMHPJLJKQQDZIABTZZLGP9GWFVTDULBNBCJJIWIHSLLPHJBRDPFQFFY",
+	"trunkTransaction": "TIYDQHFIQWXAB9CWJERNUFEFKCSW9NSYABAUIDDGPXRHQBBBZDHPKBFQT9QCZHCNUUWTLQCVKQ9H99999",
+	"branchTransaction": "RWHPZOTFCYXPLYJOGCGXRVLNRVCKJKU9TCGQORZGTVRLPKMX9MDQEGLDYXSCPIPEIAYSUFWUKWBCZ9999",
+	"tag": "DANSPAN99999999999999999999",
+	"attachmentTimestamp": 1523059970036,
+	"attachmentTimestampLowerBound": 0,
+	"attachmentTimestampUpperBound": 12,
+	"nonce": "XYHSFIGMLCZTWJOATQEDKFO9FBB"
+}
+```
+
+## 2. Attach to Tangle
