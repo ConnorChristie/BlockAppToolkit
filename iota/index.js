@@ -1,17 +1,20 @@
 const Iota = require('iota.lib.js');
 const generateSeed = require('iota-generate-seed');
 
+// const Curl = require('iota.lib.js/lib/crypto/curl/curl');
+var Converter       =   require("iota.lib.js/lib/crypto/converter/converter");
+
 let iota = new Iota({
     provider: 'http://iota.bitfinex.com:80'
 });
 
-var localAttachToTangle = (trunkTransaction, branchTransaction, minWeightMagnitude, trytes, callback) => {
-    console.log(trunkTransaction, branchTransaction);
-    callback();
-}
+// var localAttachToTangle = (trunkTransaction, branchTransaction, minWeightMagnitude, trytes, callback) => {
+//     console.log(trunkTransaction, branchTransaction);
+//     callback();
+// }
 
-iota.api.attachToTangle = localAttachToTangle;
-iota.api.__proto__.attachToTangle = localAttachToTangle;
+// iota.api.attachToTangle = localAttachToTangle;
+// iota.api.__proto__.attachToTangle = localAttachToTangle;
 
 // iota.api.findTransactionObjects({
 //     addresses: ['JXCESDPOBARLPFRBWXJRMDFGUTDNJEJX9FQXKWVBWMPLYOGDLHTF9N9JDN9IUSXZNDRGVNUKRXTRWZFQD']
@@ -61,5 +64,3 @@ iota.api.__proto__.attachToTangle = localAttachToTangle;
 //         });
 //     });
 // });
-
-console.log(iota.utils.fromTrytes('ODGABDPCADTCGADBGACCTCGDHD9DCDGAQAGAADTCGDGDPCVCTCGADBGARBPC9D9DCDEAHDWCTCFDTCSAEAVAWAXAYAZAGAQD'))

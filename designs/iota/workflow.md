@@ -21,6 +21,21 @@ A transaction may serve different purposes depending on the value or data that i
 * __`attachmentTimestampUpperBound` (int: 9 trytes):__ TODO (Future use)
 * __`nonce` (string: 27 trytes):__ The nonce used to obtain the correct hash of this transaction which satisfies the Minimum Weight Magnitude (details below).
 
+### Bundle Hash Creation
+The bundle hash is primarily used for value transfers and is one of the main ingredients for each input's signature. The hash is created by hashing certain parts of each transaction together with the Kerl hash function.
+
+#### Steps
+1. Iterate through all the transactions in the bundle
+    * __The order that the transactions are hashed in is precise__
+    * From transaction index 0 to the last transaction
+2. Concatenate the following data of the transaction together
+    * Address + value + obsoleteTag + timestamp + currentIndex + lastIndex
+3. Absorb each transaction's data into the Kerl function
+4. Squeeze out the hash from the Kerl function
+5. Set each transaction's bundle value to the generated hash
+
+_The `obsoleteTag` is used by the bundle hasher in cases of an insecure bundle hash being generated. The tag of the first transaction will be incremented when the normalized bundle hash contains any insecure values that may expose parts of the private key._ [More information here](https://github.com/iotaledger/iota.lib.js/blob/v0.4.2/lib/crypto/bundle/bundle.js#L119-L125).
+
 ### Data Transaction
 Here is an example of a data transaction. The signatureMessageFragment contains the data (in tryte format).
 ```json
@@ -50,25 +65,32 @@ The transaction converted into raw trytes.
 ODGABDPCADTCGADBGACCTCGDHD9DCDGAQAGAADTCGDGDPCVCTCGADBGARBPC9D9DCDEAHDWCTCFDTCSAEAVAWAXAYAZAGAQD999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999EC9SMJQEROYFZLCTRZGRZHMVEVGEMQQNAFXWFDVERLUGYRGPAEIOUNXAGBCMKFXGRNQHFXUUWHSKQXBXX999999999999999999999999999RLNSPAN99999999999999999999MMLXDYD99999999999999999999XTEKQODEBWFVT9WGPIJBYQCDJCOMHPJLJKQQDZIABTZZLGP9GWFVTDULBNBCJJIWIHSLLPHJBRDPFQFFYTIYDQHFIQWXAB9CWJERNUFEFKCSW9NSYABAUIDDGPXRHQBBBZDHPKBFQT9QCZHCNUUWTLQCVKQ9H99999RWHPZOTFCYXPLYJOGCGXRVLNRVCKJKU9TCGQORZGTVRLPKMX9MDQEGLDYXSCPIPEIAYSUFWUKWBCZ9999DANSPAN99999999999999999999WT9ARHPKE999999999L99999999XYHSFIGMLCZTWJOATQEDKFO9FBB
 ```
 
-### Value Transaction
-IOTA uses an UTXO-like scheme to transfer value from one address (or seed) to another. Inputs are supplied to the bundle along with outputs and an address for the unspent value to be sent to. 
+### Value Transfer (Bundle)
+IOTA uses an UTXO-like scheme to transfer value from one address (or seed) to another. Inputs are supplied to the bundle along with outputs including an address for the unspent value to be sent to. 
+
+
 
 #### For Example
-Bob holds 20i in address A and 40i in address B (addresses generated from the same seed) and wants to transfer 50i to Alice.
+Bob holds 20i in address AA and 40i in address BB (addresses generated from the same seed) and wants to transfer 50i to Alice's address CC.
 
-### Bundle Hash Creation
-The bundle hash is created by hashing certain parts of each transaction together with the Kerl hash function.
+Prerequisites:
+* Bob with seed 'ABCDE'
+    * Address AA [index: 0]: 20i
+    * Address BB [index 1]: 40i
+* Alice with seed 'LMNOP'
+    * Address CC [index: 0]: 0i
+* Addresses generated with security level 
 
-_The `obsoleteTag` is used by the bundle hasher in cases of an insecure bundle hash being generated. The tag of the first transaction will be incremented when the normalized bundle hash contains any insecure values that may expose parts of the private key._ [More Information](https://github.com/iotaledger/iota.lib.js/blob/v0.4.2/lib/crypto/bundle/bundle.js#L119-L125)
-
-#### Steps
-1. Iterate through all the transactions in the bundle
-    * __The order that the transactions are hashed in is precise__
-    * From transaction index 0 to the last transaction
-2. Concatenate the following data of the transaction together
-    * Address + value + obsoleteTag + timestamp + currentIndex + lastIndex
-3. Absorb each transaction's data into the Kerl function
-4. Squeeze out the hash from the Kerl function
-5. Set each transaction's bundle value to the generated hash
+Bundle:
+| Index | Address | Value | Purpose |
+| ----- | :-----: | :---: | ------- |
+| 0 | CC | 50 | Defines where the tokens of the input are sent to. |
+| 1 | AA | -20 | Contributes to one of the inputs for the tokens to send to Alice. The `signatureMessageFragment` in this transaction also contains the first of three parts of the signature for this input's address. |
+| 2 | AA | 0 | Contains the second half of address AA's signature. |
+| 3 | AA | 0 | Contains the last fragment of address AA's signature. The signature is split into three due to the security level (level 3) when the address was generated. |
+| 4 | BB | -40 | Contributes to one of the inputs for the tokens to send to Alice. This transaction also contains the first fragment of adress BB's signature. |
+| 5 | BB | 0 | Contains the second half of address BB's signature. |
+| 6 | BB | 0 | Contains the last fragment of address BB's signature. |
+| 7 | DD | 10 | An output where the remainder of the unspent inputs are sent to. This address is generated from Bob's seed. |
 
 ## 2. Perform Proof of Work
